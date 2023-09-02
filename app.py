@@ -4,36 +4,37 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
-import string, os
-import tensorflow as tf
+
+
 
 # keras module for building LSTM
 from keras.utils import pad_sequences
-from tensorflow.keras.layers import Embedding, Dropout, LSTM, Dense, Bidirectional
 from keras.preprocessing.text import Tokenizer
-from keras.callbacks import EarlyStopping
-from keras.models import Sequential
+
 
 import matplotlib.pyplot as plt
 import seaborn as sns
 import matplotlib.pyplot as plt
-@st.cache_resource
-def loadmodel():
-    model = load_model('song_lyrics_generator_Not_One.h5')
-    return model
 
-def complete_this_song(input_text, next_words, model):
+artist = ['the-beatles', 'john-mayer', 'taylor-swift']
+
+@st.cache_resource
+def loadmodel(model_name):
+    return load_model(model_name)
+@st.cache_data
+def load_csv():
+    return pd.read_csv('lyrics-data.csv')
+
+def complete_this_song(input_text, next_words, artist_name):
+    df = load_csv()
     df = pd.read_csv('lyrics-data.csv')
     df = df[df['language'] =='en']
-    df = df[df['ALink'] == '/taylor-swift/']
+    df = df[df['ALink'] == f'/{artist_name}/']
     df.drop(['ALink','SName','SLink'],axis=1,inplace=True)
     # Tokenization
     tokenizer = Tokenizer()
     
     tokenizer.fit_on_texts(df['Lyric'].astype(str).str.lower())
-
-    total_words = len(tokenizer.word_index)+1
 
     tokenized_sentences = tokenizer.texts_to_sequences(df['Lyric'].astype(str))
     input_sequences = list()
@@ -45,20 +46,7 @@ def complete_this_song(input_text, next_words, model):
     max_sequence_len = max([len(x) for x in input_sequences])
 
 
-    input_sequences = np.array(pad_sequences(input_sequences, maxlen=max_sequence_len, padding='pre'))
-
-    X, labels = input_sequences[:,:-1],input_sequences[:,-1]
-
-
-    y = tf.keras.utils.to_categorical(labels, num_classes=total_words) # One hot encoding
-
-    model = Sequential()
-
-    model.add(Embedding(total_words, 40, input_length=max_sequence_len-1))
-    model.add(Bidirectional(LSTM(250))) # 250 is the average number of words in a song
-    model.add(Dropout(0.1)) # To overcome overfitting
-    model.add(Dense(total_words, activation='softmax'))
-    
+    model = loadmodel(f'{artist_name}.h5')
     for _ in range(next_words):
         # for _ in... this is like a place holder, which upholds the syntax.
         # We use it when we don't want to use the variable, so we leave it empty.
@@ -77,17 +65,16 @@ def complete_this_song(input_text, next_words, model):
                 output_word = word
                 break
         input_text += " " + output_word
-    st.write(input_text)
+    st.subheader(input_text)
 
 
 def main():
-    st.title('Lyrics Generator')
+    st.title('Lyrics Autocomplete')
     input = st.text_input("Enter your Lyrics")
+    artist_selection = st.selectbox("Select your artist", artist)
     if st.button("Generate your song"):
-        model = loadmodel()
-        complete_this_song(input_text=input, next_words=80, model=model)
+        complete_this_song(input_text=input, next_words=80, artist_name=artist_selection)
         
-    
 
 if __name__ == "__main__":
     main()
