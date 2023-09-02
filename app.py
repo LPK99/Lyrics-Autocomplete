@@ -23,11 +23,10 @@ def loadmodel(model_name):
     return load_model(model_name)
 @st.cache_data
 def load_csv():
-    return pd.read_csv('lyrics-data.csv')
+    return pd.read_csv('dataset/lyrics-data.csv')
 
 def complete_this_song(input_text, next_words, artist_name):
     df = load_csv()
-    df = pd.read_csv('lyrics-data.csv')
     df = df[df['language'] =='en']
     df = df[df['ALink'] == f'/{artist_name}/']
     df.drop(['ALink','SName','SLink'],axis=1,inplace=True)
@@ -46,7 +45,7 @@ def complete_this_song(input_text, next_words, artist_name):
     max_sequence_len = max([len(x) for x in input_sequences])
 
 
-    model = loadmodel(f'{artist_name}.h5')
+    model = loadmodel(f'model/{artist_name}.h5')
     for _ in range(next_words):
         # for _ in... this is like a place holder, which upholds the syntax.
         # We use it when we don't want to use the variable, so we leave it empty.
