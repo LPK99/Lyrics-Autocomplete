@@ -2,17 +2,10 @@ import streamlit as st
 from tensorflow.keras.models import load_model
 import pandas as pd
 import numpy as np
-
-
-
-# keras module for building LSTM
 from keras.utils import pad_sequences
 from keras.preprocessing.text import Tokenizer
 
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 artist = ['the-beatles', 'john-mayer', 'taylor-swift']
 
