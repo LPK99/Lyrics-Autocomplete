@@ -64,6 +64,7 @@ def main():
     artist_selection = st.selectbox("Select your artist", artist)
     if st.button("Generate your song"):
         complete_this_song(input_text=input, next_words=80, artist_name=artist_selection)
+    st.write("Access Github repo for this app[link](https://github.com/LPK99/Lyrics-Autocomplete)")
         
 
 if __name__ == "__main__":
